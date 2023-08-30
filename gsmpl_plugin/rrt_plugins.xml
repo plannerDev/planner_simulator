@@ -1,0 +1,7 @@
+<library path="rrt_plugin">
+  <class name="rrt_interface/RRTPlanner" type="rrt_interface::RRTPlannerManager" base_class_type="planning_interface::PlannerManager">
+    <description>
+    The RRT motion planner plugin.
+    </description>
+  </class>
+</library>
