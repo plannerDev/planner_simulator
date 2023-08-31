@@ -1,0 +1,12 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/dsh/ws_moveit2/install/moveit_msgs/lib/python3.8/site-packages",
+        "/home/dsh/ws_moveit2/install/launch_param_builder/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/dsh/ws_moveit2/install/moveit_msgs/lib/python3.8/site-packages",
+        "/home/dsh/ws_moveit2/install/launch_param_builder/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
+}
