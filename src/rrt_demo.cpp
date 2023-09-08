@@ -16,8 +16,7 @@
 #include "rrt_planning_context.h"
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("rrt_demo");
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     rclcpp::NodeOptions nodeOptions;
     nodeOptions.automatically_declare_parameters_from_overrides(true);
@@ -42,49 +41,61 @@ int main(int argc, char** argv)
     // :moveit_codedir:`RobotModel<moveit_core/robot_model/include/moveit/robot_model/robot_model.h>`
     // for us to use.
     const std::string PLANNING_GROUP = "panda_arm";
-    robot_model_loader::RobotModelLoader robotModelLoader(rrtDemoNode, "robot_description");
+    robot_model_loader::RobotModelLoader robotModelLoader(rrtDemoNode,
+                                                          "robot_description");
     const moveit::core::RobotModelPtr& robotModel = robotModelLoader.getModel();
-    /* Create a RobotState and JointModelGroup to keep track of the current robot pose and planning
-     * group*/
-    moveit::core::RobotStatePtr robotState(new moveit::core::RobotState(robotModel));
-    const moveit::core::JointModelGroup* jmg = robotState->getJointModelGroup(PLANNING_GROUP);
-    moveit::planning_interface::MoveGroupInterface moveGroup(rrtDemoNode, PLANNING_GROUP);
-    planning_scene::PlanningScenePtr planningScene(new planning_scene::PlanningScene(robotModel));
+    /* Create a RobotState and JointModelGroup to keep track of the current
+     * robot pose and planning group*/
+    moveit::core::RobotStatePtr robotState(
+        new moveit::core::RobotState(robotModel));
+    const moveit::core::JointModelGroup* jmg =
+        robotState->getJointModelGroup(PLANNING_GROUP);
+    moveit::planning_interface::MoveGroupInterface moveGroup(rrtDemoNode,
+                                                             PLANNING_GROUP);
+    planning_scene::PlanningScenePtr planningScene(
+        new planning_scene::PlanningScene(robotModel));
 
     pluginlib::ClassLoader<planning_interface::PlannerManager> polyLoader(
         "moveit_core", "planning_interface::PlannerManager");
-    planning_interface::PlannerManagerPtr rrtPlanner = polyLoader.createSharedInstance(
-        "rrt_interface/RRTPlanner"); // chomp_interface/CHOMPPlanner ompl_interface/OMPLPlanner
-    rrtPlanner->initialize(robotModel, rrtDemoNode, rrtDemoNode->get_namespace());
-    RCLCPP_INFO(LOGGER, "Using planning interface '%s'", rrtPlanner->getDescription().data());
+    planning_interface::PlannerManagerPtr rrtPlanner =
+        polyLoader.createSharedInstance(
+            "rrt_interface/RRTPlanner"); // chomp_interface/CHOMPPlanner
+                                         // ompl_interface/OMPLPlanner
+    rrtPlanner->initialize(robotModel, rrtDemoNode,
+                           rrtDemoNode->get_namespace());
+    RCLCPP_INFO(LOGGER, "Using planning interface '%s'",
+                rrtPlanner->getDescription().data());
 
     // Visualization
     // ^^^^^^^^^^^^^
-    // The package MoveItVisualTools provides many capabilities for visualizing objects, robots,
-    // and trajectories in RViz as well as debugging tools such as step-by-step introspection of a
-    // script.
+    // The package MoveItVisualTools provides many capabilities for visualizing
+    // objects, robots, and trajectories in RViz as well as debugging tools such
+    // as step-by-step introspection of a script.
     namespace rvt = rviz_visual_tools;
-    moveit_visual_tools::MoveItVisualTools visualTools(rrtDemoNode, "panda_link0",
-                                                       "move_group_tutorial",
-                                                       robotModel); // move_group.getRobotModel()
+    moveit_visual_tools::MoveItVisualTools visualTools(
+        rrtDemoNode, "panda_link0", "move_group_tutorial",
+        robotModel); // move_group.getRobotModel()
     visualTools.enableBatchPublishing();
     visualTools.deleteAllMarkers(); // clear all old markers
     visualTools.trigger();
 
-    /* Remote control is an introspection tool that allows users to step through a high level script
-      via buttons and keyboard shortcuts in RViz */
+    /* Remote control is an introspection tool that allows users to step through
+      a high level script via buttons and keyboard shortcuts in RViz */
     visualTools.loadRemoteControl();
 
-    /* RViz provides many types of markers, in this demo we will use text, cylinders, and spheres*/
+    /* RViz provides many types of markers, in this demo we will use text,
+     * cylinders, and spheres*/
     Eigen::Isometry3d textPose = Eigen::Isometry3d::Identity();
     textPose.translation().z() = 1.75;
-    visualTools.publishText(textPose, "Motion Planning API Demo", rvt::WHITE, rvt::XLARGE);
+    visualTools.publishText(textPose, "Motion Planning API Demo", rvt::WHITE,
+                            rvt::XLARGE);
 
-    /* Batch publishing is used to reduce the number of messages being sent to RViz for large
-     * visualizations */
+    /* Batch publishing is used to reduce the number of messages being sent to
+     * RViz for large visualizations */
     visualTools.trigger();
     /* We can also use visualTools to wait for user input */
-    visualTools.prompt("Press 'next' in the RvizVisualToolsGui window to start the demo");
+    visualTools.prompt(
+        "Press 'next' in the RvizVisualToolsGui window to start the demo");
 
     // add object to the word
     moveit::planning_interface::PlanningSceneInterface planningSceneInterface;
@@ -133,7 +144,8 @@ int main(int argc, char** argv)
     visualTools.publishText(textPose, "Add_object", rvt::WHITE, rvt::XLARGE);
     visualTools.trigger();
     visualTools.prompt(
-        "Press 'next' in the RvizVisualToolsGui window to once the collision object appears in "
+        "Press 'next' in the RvizVisualToolsGui window to once the collision "
+        "object appears in "
         "RViz");
 
     planning_interface::MotionPlanRequest req;
@@ -144,9 +156,10 @@ int main(int argc, char** argv)
 
     // Visualize the result
     // ^^^^^^^^^^^^^^^^^^^^
-    std::shared_ptr<rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>> displayPublisher =
-        rrtDemoNode->create_publisher<moveit_msgs::msg::DisplayTrajectory>("/display_planned_path",
-                                                                           1);
+    std::shared_ptr<rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>>
+        displayPublisher =
+            rrtDemoNode->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
+                "/display_planned_path", 1);
     moveit_msgs::msg::DisplayTrajectory displayTrajectory;
     moveit_msgs::msg::MotionPlanResponse response;
 
@@ -154,8 +167,9 @@ int main(int argc, char** argv)
     // ^^^^^^^^^^^^^^^^^
     // Now, setup a joint space goal
     moveit::core::RobotState goalState(robotModel);
-    std::vector<double> goalValues = {-1.0, 0.7, 0.7, -1.5,
-                                      -0.7, 2.0, 0.0}; // -0.4 -0.325 0.36 -1.996 -0.38 1.991 0.425
+    std::vector<double> goalValues = {
+        -1.0, 0.7, 0.7, -1.5,
+        -0.7, 2.0, 0.0}; // -0.4 -0.325 0.36 -1.996 -0.38 1.991 0.425
     goalState.setJointGroupPositions(jmg, goalValues);
     moveit_msgs::msg::Constraints jointGoal =
         kinematic_constraints::constructGoalConstraints(goalState, jmg);
@@ -166,7 +180,8 @@ int main(int argc, char** argv)
     planningScene->getCurrentStateNonConst().setToDefaultValues(jmg, "ready");
 
     /* Re-construct the planning context */
-    context = rrtPlanner->getPlanningContext(planningScene, req, res.error_code_);
+    context =
+        rrtPlanner->getPlanningContext(planningScene, req, res.error_code_);
     RCLCPP_INFO(LOGGER, "Call the Planner");
     /* Call the Planner */
     context->solve(res);
@@ -194,7 +209,8 @@ int main(int argc, char** argv)
     planningScene->setCurrentState(*robotState.get());
 
     visualTools.trigger();
-    visualTools.prompt("Press 'next' in the RvizVisualToolsGui window to exit the demo");
+    visualTools.prompt(
+        "Press 'next' in the RvizVisualToolsGui window to exit the demo");
     rrtPlanner.reset();
 
     rclcpp::shutdown();

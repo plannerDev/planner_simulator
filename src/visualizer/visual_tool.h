@@ -14,33 +14,34 @@
 
 namespace gsmpl {
 
-struct TreeVisualizeRecord
-{
+struct TreeVisualizeRecord {
     std::vector<Edge> edges;
     std::vector<const Vertex*> vertexes;
 };
 
-class VisualToolImpl
-{
+class VisualToolImpl {
 public:
     VisualToolImpl(const rclcpp::Node::SharedPtr& node, const FKPandaPtr& fk,
                    const moveit::core::RobotModelConstPtr& robotModel)
-        : frameId_("panda_link0"), fk_(fk),
-          visualTool_(node, frameId_, "move_group_tutorial", robotModel)
-    {
-    }
+        : frameId_("panda_link0"),
+          fk_(fk),
+          visualTool_(node, frameId_, "move_group_tutorial", robotModel) {}
 
 protected:
-
     void deleteAllMarkers() { visualTool_.deleteAllMarkers(); }
     void visualizeAxis(const State& q, const std::string& poseDesc = "");
-    void visualizeAxis(const geometry_msgs::msg::Pose& pose, const std::string& poseDesc);
-    void visualizeAxis(const Eigen::Isometry3d& pose, const std::string& poseDesc);
+    void visualizeAxis(const geometry_msgs::msg::Pose& pose,
+                       const std::string& poseDesc);
+    void visualizeAxis(const Eigen::Isometry3d& pose,
+                       const std::string& poseDesc);
     void visualizeAxises(const std::vector<State>& qVector);
     void visualizePoses(const std::vector<State>& qVector, const RGBA& color);
-    void visualizePoint(const Eigen::Vector3d& p, const RGBA& color, const std::string& name = "");
-    void visualizePoint(const State& q, const RGBA& color, const std::string& name = "");
-    void visualizeTree(const Tree& tree, const RGBA& color, const std::string& name = "");
+    void visualizePoint(const Eigen::Vector3d& p, const RGBA& color,
+                        const std::string& name = "");
+    void visualizePoint(const State& q, const RGBA& color,
+                        const std::string& name = "");
+    void visualizeTree(const Tree& tree, const RGBA& color,
+                       const std::string& name = "");
 
 private:
     geometry_msgs::msg::Point state2Point(const State& q);
@@ -52,19 +53,16 @@ private:
     moveit_visual_tools::MoveItVisualTools visualTool_;
 };
 
-class VisualTool : public VisualToolImpl
-{
+class VisualTool : public VisualToolImpl {
 public:
     VisualTool(const rclcpp::Node::SharedPtr& node, const FKPandaPtr& fk,
                const moveit::core::RobotModelConstPtr& robotModel)
-        : VisualToolImpl(node, fk, robotModel)
-    {
-    }
+        : VisualToolImpl(node, fk, robotModel) {}
 
     void visualizePlannerRecord(const PlannerRecord& data);
     void visualizePose(const State& q) { VisualToolImpl::visualizeAxis(q); }
-    void visualizePoint(const State& q, const RGBA& color, const std::string& name = "")
-    {
+    void visualizePoint(const State& q, const RGBA& color,
+                        const std::string& name = "") {
         VisualToolImpl::visualizePoint(q, color, name);
     }
 };

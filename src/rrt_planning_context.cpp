@@ -3,10 +3,10 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
 #include <planner_interface.h>
-#include <bi_rrt/bi_rrt_param.h>
-#include <rrt/rrt_param.h>
-#include <rrt_star/rrt_star_param.h>
-#include <informed_rrt_star/informed_rrt_star_param.h>
+#include <planner/bi_rrt/bi_rrt_param.h>
+#include <planner/rrt/rrt_param.h>
+#include <planner/rrt_star/rrt_star_param.h>
+#include <planner/informed_rrt_star/informed_rrt_star_param.h>
 #include <planner_data/planner_param.h>
 #include <tools/checker/state_checker_group.h>
 #include <tools/checker/cone_region_checker.h>
@@ -17,8 +17,7 @@
 namespace rrt_interface {
 namespace {
 gsmpl::State moveit2Planner(const moveit::core::RobotState& robotState,
-                            const moveit::core::JointModelGroup* jmg)
-{
+                            const moveit::core::JointModelGroup* jmg) {
     gsmpl::State state;
     for (const auto& jointModel : jmg->getActiveJointModels()) {
         const double* valuePtr = robotState.getJointPositions(jointModel);
@@ -28,13 +27,16 @@ gsmpl::State moveit2Planner(const moveit::core::RobotState& robotState,
     return state;
 }
 } // namespace
-bool RRTPlanningContext::solve(planning_interface::MotionPlanResponse& res)
-{
+bool RRTPlanningContext::solve(planning_interface::MotionPlanResponse& res) {
     planning_interface::MotionPlanDetailedResponse detailRes;
     if (solve(detailRes)) {
-        std::cout << "detail_res.trajectory_ size " << detailRes.trajectory_.size() << std::endl;
-        res.trajectory_ = detailRes.trajectory_[0]; // TODO: generate multi-segment trajectories
-        std::cout << "res.trajectory size: " << res.trajectory_->getWayPointCount() << std::endl;
+        std::cout << "detail_res.trajectory_ size "
+                  << detailRes.trajectory_.size() << std::endl;
+        res.trajectory_ =
+            detailRes
+                .trajectory_[0]; // TODO: generate multi-segment trajectories
+        std::cout << "res.trajectory size: "
+                  << res.trajectory_->getWayPointCount() << std::endl;
     }
     res.planning_time_ = detailRes.processing_time_[0];
     res.error_code_ = detailRes.error_code_;
@@ -45,34 +47,39 @@ bool RRTPlanningContext::terminate() { return false; }
 
 void RRTPlanningContext::clear() {}
 
-robot_trajectory::RobotTrajectory RRTPlanningContext::path2Trajectry(const gsmpl::Path& path)
-{
-    auto trajectory = robot_trajectory::RobotTrajectory(robotModel_, getGroupName());
+robot_trajectory::RobotTrajectory RRTPlanningContext::path2Trajectry(
+    const gsmpl::Path& path) {
+    auto trajectory =
+        robot_trajectory::RobotTrajectory(robotModel_, getGroupName());
     double dt = 0.01;
     for (const auto& point : path) {
         moveit::core::RobotState state(robotModel_);
         state.setJointGroupPositions(group_, point.values);
         trajectory.addSuffixWayPoint(state, dt);
     }
-    std::cout << "rrt trajectory size: " << trajectory.getWayPointCount() << std::endl;
+    std::cout << "rrt trajectory size: " << trajectory.getWayPointCount()
+              << std::endl;
     return trajectory;
 }
 
-gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextBiRRT()
-{
+gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextBiRRT() {
     // bounds
-    const moveit::core::JointModelGroup* jmg = robotModel_->getJointModelGroup(group_);
-    std::vector<const std::vector<moveit::core::VariableBounds>*> jointBoundsVector =
-        jmg->getActiveJointModelsBounds();
+    const moveit::core::JointModelGroup* jmg =
+        robotModel_->getJointModelGroup(group_);
+    std::vector<const std::vector<moveit::core::VariableBounds>*>
+        jointBoundsVector = jmg->getActiveJointModelsBounds();
     gsmpl::Bounds bounds{generateRRTBounds(jointBoundsVector)};
     // checkers
     gsmpl::CollisionCheckerPtr collisionChecker(
-        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_, visual_tool_));
+        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_,
+                                                  visual_tool_));
     collisionChecker->init(planning_scene_->getWorld());
     gsmpl::ZConeRegionCheckerPtr zConeRegionChecker(
-        std::make_shared<gsmpl::ZConeRegionChecker>(fk_, bi_rrt::CONE_THRESHOLD)); // 0.3rad = 17deg
+        std::make_shared<gsmpl::ZConeRegionChecker>(
+            fk_, bi_rrt::CONE_THRESHOLD)); // 0.3rad = 17deg
 
-    gsmpl::StateCheckerGroupPtr checkers = std::make_shared<gsmpl::StateCheckerGroup>(bounds);
+    gsmpl::StateCheckerGroupPtr checkers =
+        std::make_shared<gsmpl::StateCheckerGroup>(bounds);
     checkers->addChecker(collisionChecker);
     checkers->addChecker(zConeRegionChecker);
 
@@ -92,30 +99,35 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextBiRRT()
         bi_rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         bi_rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         bi_rrt::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
-    gsmpl::PlannerGeneralParamters generalParam{bounds.size(), pathSimplifierParam, bounds,
-                                                bi_rrt::CONE_THRESHOLD};
+    gsmpl::PlannerGeneralParamters generalParam{
+        bounds.size(), pathSimplifierParam, bounds, bi_rrt::CONE_THRESHOLD};
     // context
     return gsmpl::PlannerContext(
         gsmpl::PlannerType::BiRRT,
-        std::make_shared<gsmpl::SampleWithBiasParam>(bi_rrt::SAMPLER_ATTEMPTS, bi_rrt::GOAL_BIAS),
-        std::make_shared<gsmpl::BiRRTParam>(param), generalParam, checkers, fk_);
+        std::make_shared<gsmpl::SampleWithBiasParam>(bi_rrt::SAMPLER_ATTEMPTS,
+                                                     bi_rrt::GOAL_BIAS),
+        std::make_shared<gsmpl::BiRRTParam>(param), generalParam, checkers,
+        fk_);
 }
 
-gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRT()
-{
+gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRT() {
     // bounds
-    const moveit::core::JointModelGroup* jmg = robotModel_->getJointModelGroup(group_);
-    std::vector<const std::vector<moveit::core::VariableBounds>*> jointBoundsVector =
-        jmg->getActiveJointModelsBounds();
+    const moveit::core::JointModelGroup* jmg =
+        robotModel_->getJointModelGroup(group_);
+    std::vector<const std::vector<moveit::core::VariableBounds>*>
+        jointBoundsVector = jmg->getActiveJointModelsBounds();
     gsmpl::Bounds bounds{generateRRTBounds(jointBoundsVector)};
     // checkers
     gsmpl::CollisionCheckerPtr collisionChecker(
-        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_, visual_tool_));
+        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_,
+                                                  visual_tool_));
     collisionChecker->init(planning_scene_->getWorld());
     gsmpl::ZConeRegionCheckerPtr zConeRegionChecker(
-        std::make_shared<gsmpl::ZConeRegionChecker>(fk_, rrt::CONE_THRESHOLD)); // 0.3rad = 17deg
+        std::make_shared<gsmpl::ZConeRegionChecker>(
+            fk_, rrt::CONE_THRESHOLD)); // 0.3rad = 17deg
 
-    gsmpl::StateCheckerGroupPtr checkers = std::make_shared<gsmpl::StateCheckerGroup>(bounds);
+    gsmpl::StateCheckerGroupPtr checkers =
+        std::make_shared<gsmpl::StateCheckerGroup>(bounds);
     checkers->addChecker(collisionChecker);
     checkers->addChecker(zConeRegionChecker);
 
@@ -136,30 +148,34 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRT()
         rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         rrt::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
-    gsmpl::PlannerGeneralParamters generalParam{bounds.size(), pathSimplifierParam, bounds,
-                                                rrt::CONE_THRESHOLD};
+    gsmpl::PlannerGeneralParamters generalParam{
+        bounds.size(), pathSimplifierParam, bounds, rrt::CONE_THRESHOLD};
     // context
-    return gsmpl::PlannerContext(
-        gsmpl::PlannerType::RRT,
-        std::make_shared<gsmpl::SampleWithBiasParam>(rrt::SAMPLER_ATTEMPTS, rrt::GOAL_BIAS),
-        std::make_shared<gsmpl::RRTParam>(param), generalParam, checkers, fk_);
+    return gsmpl::PlannerContext(gsmpl::PlannerType::RRT,
+                                 std::make_shared<gsmpl::SampleWithBiasParam>(
+                                     rrt::SAMPLER_ATTEMPTS, rrt::GOAL_BIAS),
+                                 std::make_shared<gsmpl::RRTParam>(param),
+                                 generalParam, checkers, fk_);
 }
 
-gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRTStar()
-{
+gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRTStar() {
     // bounds
-    const moveit::core::JointModelGroup* jmg = robotModel_->getJointModelGroup(group_);
-    std::vector<const std::vector<moveit::core::VariableBounds>*> jointBoundsVector =
-        jmg->getActiveJointModelsBounds();
+    const moveit::core::JointModelGroup* jmg =
+        robotModel_->getJointModelGroup(group_);
+    std::vector<const std::vector<moveit::core::VariableBounds>*>
+        jointBoundsVector = jmg->getActiveJointModelsBounds();
     gsmpl::Bounds bounds{generateRRTBounds(jointBoundsVector)};
     // checkers
     gsmpl::CollisionCheckerPtr collisionChecker(
-        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_, visual_tool_));
+        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_,
+                                                  visual_tool_));
     collisionChecker->init(planning_scene_->getWorld());
-    gsmpl::ZConeRegionCheckerPtr zConeRegionChecker(std::make_shared<gsmpl::ZConeRegionChecker>(
-        fk_, rrt_star::CONE_THRESHOLD)); // 0.3rad = 17deg
+    gsmpl::ZConeRegionCheckerPtr zConeRegionChecker(
+        std::make_shared<gsmpl::ZConeRegionChecker>(
+            fk_, rrt_star::CONE_THRESHOLD)); // 0.3rad = 17deg
 
-    gsmpl::StateCheckerGroupPtr checkers = std::make_shared<gsmpl::StateCheckerGroup>(bounds);
+    gsmpl::StateCheckerGroupPtr checkers =
+        std::make_shared<gsmpl::StateCheckerGroup>(bounds);
     checkers->addChecker(collisionChecker);
     checkers->addChecker(zConeRegionChecker);
 
@@ -180,30 +196,34 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRTStar()
         rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         rrt_star::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
-    gsmpl::PlannerGeneralParamters generalParam{bounds.size(), pathSimplifierParam, bounds,
-                                                rrt_star::CONE_THRESHOLD};
+    gsmpl::PlannerGeneralParamters generalParam{
+        bounds.size(), pathSimplifierParam, bounds, rrt_star::CONE_THRESHOLD};
     // context
-    return gsmpl::PlannerContext(gsmpl::PlannerType::RRTStar,
-                                 std::make_shared<gsmpl::SampleWithBiasParam>(
-                                     rrt_star::SAMPLER_ATTEMPTS, rrt_star::GOAL_BIAS),
-                                 std::make_shared<gsmpl::RRTStarParam>(param), generalParam,
-                                 checkers, fk_);
+    return gsmpl::PlannerContext(
+        gsmpl::PlannerType::RRTStar,
+        std::make_shared<gsmpl::SampleWithBiasParam>(rrt_star::SAMPLER_ATTEMPTS,
+                                                     rrt_star::GOAL_BIAS),
+        std::make_shared<gsmpl::RRTStarParam>(param), generalParam, checkers,
+        fk_);
 }
-gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextInformedRRTStar()
-{
+gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextInformedRRTStar() {
     // bounds
-    const moveit::core::JointModelGroup* jmg = robotModel_->getJointModelGroup(group_);
-    std::vector<const std::vector<moveit::core::VariableBounds>*> jointBoundsVector =
-        jmg->getActiveJointModelsBounds();
+    const moveit::core::JointModelGroup* jmg =
+        robotModel_->getJointModelGroup(group_);
+    std::vector<const std::vector<moveit::core::VariableBounds>*>
+        jointBoundsVector = jmg->getActiveJointModelsBounds();
     gsmpl::Bounds bounds{generateRRTBounds(jointBoundsVector)};
     // checkers
     gsmpl::CollisionCheckerPtr collisionChecker(
-        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_, visual_tool_));
+        std::make_shared<gsmpl::CollisionChecker>(robotModel_, fk_,
+                                                  visual_tool_));
     collisionChecker->init(planning_scene_->getWorld());
-    gsmpl::ZConeRegionCheckerPtr zConeRegionChecker(std::make_shared<gsmpl::ZConeRegionChecker>(
-        fk_, informed_rrt_star::CONE_THRESHOLD)); // 0.3rad = 17deg
+    gsmpl::ZConeRegionCheckerPtr zConeRegionChecker(
+        std::make_shared<gsmpl::ZConeRegionChecker>(
+            fk_, informed_rrt_star::CONE_THRESHOLD)); // 0.3rad = 17deg
 
-    gsmpl::StateCheckerGroupPtr checkers = std::make_shared<gsmpl::StateCheckerGroup>(bounds);
+    gsmpl::StateCheckerGroupPtr checkers =
+        std::make_shared<gsmpl::StateCheckerGroup>(bounds);
     checkers->addChecker(zConeRegionChecker);
     checkers->addChecker(collisionChecker);
 
@@ -214,13 +234,14 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextInformedRRTStar()
                                  bi_rrt::LOCAL_PLANNER_SETP_SIZE_JPS,
                                  bi_rrt::LOCAL_PLANNER_SETP_SIZE_TCP,
                                  bi_rrt::CONNECTION_RANGE};
-    gsmpl::InformedRRTStarParam param{bounds.size(),
-                                      informed_rrt_star::RRT_MAX_STEPS,
-                                      informed_rrt_star::RRT_STEP_SIZE,
-                                      informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_JPS,
-                                      informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_TCP,
-                                      informed_rrt_star::GOAL_COST_THRESHOLD,
-                                      biRRTparam};
+    gsmpl::InformedRRTStarParam param{
+        bounds.size(),
+        informed_rrt_star::RRT_MAX_STEPS,
+        informed_rrt_star::RRT_STEP_SIZE,
+        informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_JPS,
+        informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_TCP,
+        informed_rrt_star::GOAL_COST_THRESHOLD,
+        biRRTparam};
     gsmpl::PathSimplifierParamters pathSimplifierParam{
         informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_JPS,
         informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_TCP,
@@ -230,22 +251,25 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextInformedRRTStar()
         informed_rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         informed_rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         informed_rrt_star::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
-    gsmpl::PlannerGeneralParamters generalParam{bounds.size(), pathSimplifierParam, bounds,
-                                                informed_rrt_star::CONE_THRESHOLD};
+    gsmpl::PlannerGeneralParamters generalParam{
+        bounds.size(), pathSimplifierParam, bounds,
+        informed_rrt_star::CONE_THRESHOLD};
     // context
     return gsmpl::PlannerContext(
         gsmpl::PlannerType::InformedRRTStar,
-        std::make_shared<gsmpl::SampleWithBiasParam>(bi_rrt::SAMPLER_ATTEMPTS, bi_rrt::GOAL_BIAS),
-        std::make_shared<gsmpl::InformedRRTStarParam>(param), generalParam, checkers, fk_);
+        std::make_shared<gsmpl::SampleWithBiasParam>(bi_rrt::SAMPLER_ATTEMPTS,
+                                                     bi_rrt::GOAL_BIAS),
+        std::make_shared<gsmpl::InformedRRTStarParam>(param), generalParam,
+        checkers, fk_);
 }
-bool RRTPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
-{
+bool RRTPlanningContext::solve(
+    planning_interface::MotionPlanDetailedResponse& res) {
     // printModelInfo();
     auto startTime = std::chrono::steady_clock::now();
     // gsmpl::PlannerContext context = creatPlannerContextBiRRT();
     // gsmpl::PlannerContext context = creatPlannerContextRRT();
-    // gsmpl::PlannerContext context = creatPlannerContextRRTStar();
-    gsmpl::PlannerContext context = creatPlannerContextInformedRRTStar();
+    gsmpl::PlannerContext context = creatPlannerContextRRTStar();
+    // gsmpl::PlannerContext context = creatPlannerContextInformedRRTStar();
 
     res.trajectory_.clear();
     bool solved = false;
@@ -254,21 +278,26 @@ bool RRTPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& r
 
     for (const auto& goalConstraint : request_.goal_constraints) {
         // start
-        const moveit::core::JointModelGroup* jmg = robotModel_->getJointModelGroup(group_);
-        const moveit::core::RobotState currentState = planning_scene_->getCurrentState();
+        const moveit::core::JointModelGroup* jmg =
+            robotModel_->getJointModelGroup(group_);
+        const moveit::core::RobotState currentState =
+            planning_scene_->getCurrentState();
         gsmpl::State start = moveit2Planner(currentState, jmg);
+        gsmpl::State goal = reqGoal2Values(goalConstraint);
 
         // BiRRT goal
-        gsmpl::State goal = reqGoal2Values(goalConstraint);
-        gsmpl::GoalSingleStatePtr goalPtr =
-            std::make_shared<gsmpl::GoalSingleState>(context.generalParam.bounds, goal, distance);
+        // gsmpl::GoalSingleStatePtr goalPtr =
+        //     std::make_shared<gsmpl::GoalSingleState>(context.generalParam.bounds,
+        //     goal, distance);
         // RRT goal
-        // gsmpl::GoalWithJointTolerancePtr goalPtr =
-        // std::make_shared<gsmpl::GoalWithJointTolerance>(
-        //     context.generalParam.bounds, informed_rrt_star::GOAL_THRESHOLD, goal, distance);
+        gsmpl::GoalWithJointTolerancePtr goalPtr =
+            std::make_shared<gsmpl::GoalWithJointTolerance>(
+                context.generalParam.bounds, rrt_star::GOAL_THRESHOLD, goal,
+                distance);
         // optiObjective
-        gsmpl::OptiPathLengthPtr optiObjective = std::make_shared<gsmpl::OptiPathLength>(
-            bi_rrt::COST_THRESHOLD, context.generalParam.bounds, distance);
+        gsmpl::OptiPathLengthPtr optiObjective =
+            std::make_shared<gsmpl::OptiPathLength>(
+                bi_rrt::COST_THRESHOLD, context.generalParam.bounds, distance);
         // ProblemDefinition
         gsmpl::ProblemDefinition pd{start, goalPtr, optiObjective};
 
@@ -277,15 +306,17 @@ bool RRTPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& r
             context, pd,
             std::bind(&gsmpl::VisualTool::visualizePlannerRecord, &visual_tool_,
                       std::placeholders::_1),
-            std::bind(&gsmpl::VisualTool::visualizePoint, &visual_tool_, std::placeholders::_1,
-                      std::placeholders::_2, std::placeholders::_3));
+            std::bind(&gsmpl::VisualTool::visualizePoint, &visual_tool_,
+                      std::placeholders::_1, std::placeholders::_2,
+                      std::placeholders::_3));
         solved = pi.plan(solution_);
         pi.visualize();
 
         gsmpl::Path path = solution_.path;
 
         robot_trajectory::RobotTrajectory trajectory = path2Trajectry(path);
-        res.trajectory_.push_back(std::make_shared<robot_trajectory::RobotTrajectory>(trajectory));
+        res.trajectory_.push_back(
+            std::make_shared<robot_trajectory::RobotTrajectory>(trajectory));
 
         if (!solved)
             break;
@@ -301,14 +332,14 @@ bool RRTPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& r
     auto endTime = std::chrono::steady_clock::now();
     res.processing_time_.push_back(
         std::chrono::duration<double>((endTime - startTime)).count()); // s
-    // std::cout << "processing_time: " << res.processing_time_[0] << " " << (endTime -
-    // startTime).count() << std::endl;
+    // std::cout << "processing_time: " << res.processing_time_[0] << " " <<
+    // (endTime - startTime).count() << std::endl;
 
     return solved;
 }
 
-gsmpl::State RRTPlanningContext::reqGoal2Values(const moveit_msgs::msg::Constraints& constraint)
-{
+gsmpl::State RRTPlanningContext::reqGoal2Values(
+    const moveit_msgs::msg::Constraints& constraint) {
     gsmpl::State state;
     for (const auto& jointConstraint : constraint.joint_constraints) {
         state.push_back(jointConstraint.position);
@@ -317,39 +348,42 @@ gsmpl::State RRTPlanningContext::reqGoal2Values(const moveit_msgs::msg::Constrai
 }
 
 gsmpl::Bounds RRTPlanningContext::generateRRTBounds(
-    const moveit::core::JointBoundsVector& jointBoundsVector)
-{
+    const moveit::core::JointBoundsVector& jointBoundsVector) {
     gsmpl::Bounds bounds;
     for (const auto& jointBounds : jointBoundsVector) {
         assert(jointBounds->size() == 1);
         moveit::core::VariableBounds moveitBound = jointBounds->data()[0];
-        bounds.push_back(gsmpl::Bound(moveitBound.min_position_, moveitBound.max_position_,
-                                      gsmpl::JointType::Revolute)); // TODO: add other type case
+        bounds.push_back(gsmpl::Bound(
+            moveitBound.min_position_, moveitBound.max_position_,
+            gsmpl::JointType::Revolute)); // TODO: add other type case
     }
     return bounds;
 }
 
-void RRTPlanningContext::printModelInfo()
-{
-    const moveit::core::JointModelGroup* jmg = robotModel_->getJointModelGroup(group_);
+void RRTPlanningContext::printModelInfo() {
+    const moveit::core::JointModelGroup* jmg =
+        robotModel_->getJointModelGroup(group_);
     for (const auto& name : jmg->getJointModelNames()) {
         std::cout << "joint: " << name << std::endl;
         const moveit::core::JointModel* jointModel = jmg->getJointModel(name);
-        std::cout << "bound: " << jointModel->getVariableBounds().size() << std::endl;
+        std::cout << "bound: " << jointModel->getVariableBounds().size()
+                  << std::endl;
         for (const auto& bound : jointModel->getVariableBounds()) {
             std::cout << " max_position_: " << bound.max_position_
                       << " min_position_: " << bound.min_position_
                       << " max_velocity_: " << bound.max_velocity_
                       << " min_velocity_: " << bound.min_velocity_
                       << " max_acceleration_: " << bound.max_acceleration_
-                      << " min_acceleration_: " << bound.min_acceleration_ << std::endl;
+                      << " min_acceleration_: " << bound.min_acceleration_
+                      << std::endl;
         }
         std::cout << "boundMsg: " << std::endl;
         for (const auto& boundMsg : jointModel->getVariableBoundsMsg()) {
             std::cout << " max_position_: " << boundMsg.max_position
                       << " min_position_: " << boundMsg.min_position
                       << " max_velocity_: " << boundMsg.max_velocity
-                      << " max_acceleration_: " << boundMsg.max_acceleration << std::endl;
+                      << " max_acceleration_: " << boundMsg.max_acceleration
+                      << std::endl;
         }
     }
     for (const auto& name : jmg->getLinkModelNames()) {
@@ -359,6 +393,7 @@ void RRTPlanningContext::printModelInfo()
         std::cout << "Variable name: " << name << std::endl;
     }
     std::cout << "getVariableCount: " << jmg->getVariableCount() << std::endl;
-    std::cout << "getActiveVariableCount: " << jmg->getActiveVariableCount() << std::endl;
+    std::cout << "getActiveVariableCount: " << jmg->getActiveVariableCount()
+              << std::endl;
 }
 } // namespace rrt_interface

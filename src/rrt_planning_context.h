@@ -11,16 +11,16 @@
 namespace rrt_interface {
 MOVEIT_CLASS_FORWARD(RRTPlanningContext);
 
-class RRTPlanningContext : public planning_interface::PlanningContext
-{
+class RRTPlanningContext : public planning_interface::PlanningContext {
 public:
     RRTPlanningContext(const std::string& name, const std::string& group,
                        moveit::core::RobotModelConstPtr robotModel,
                        const rclcpp::Node::SharedPtr& node)
-        : planning_interface::PlanningContext(name, group), robotModel_(robotModel), node_(node),
+        : planning_interface::PlanningContext(name, group),
+          robotModel_(robotModel),
+          node_(node),
           fk_(std::make_shared<gsmpl::FKPanda>(robotModel_, group)),
-          visual_tool_(node_, fk_, robotModel_)
-    {
+          visual_tool_(node_, fk_, robotModel_) {
         std::cout << "RRTPlanningContext constructor" << std::endl;
     }
     ~RRTPlanningContext() override {}
@@ -32,9 +32,12 @@ public:
 
 private:
     void printModelInfo();
-    gsmpl::Bounds generateRRTBounds(const moveit::core::JointBoundsVector& jointBoundsVector);
-    robot_trajectory::RobotTrajectory path2Trajectry(const std::vector<gsmpl::State>& path);
-    gsmpl::State reqGoal2Values(const moveit_msgs::msg::Constraints& constraint);
+    gsmpl::Bounds generateRRTBounds(
+        const moveit::core::JointBoundsVector& jointBoundsVector);
+    robot_trajectory::RobotTrajectory path2Trajectry(
+        const std::vector<gsmpl::State>& path);
+    gsmpl::State reqGoal2Values(
+        const moveit_msgs::msg::Constraints& constraint);
     gsmpl::PlannerContext creatPlannerContextBiRRT();
     gsmpl::PlannerContext creatPlannerContextRRT();
     gsmpl::PlannerContext creatPlannerContextRRTStar();

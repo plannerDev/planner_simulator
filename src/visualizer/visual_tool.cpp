@@ -2,8 +2,8 @@
 #include "visual_tool.h"
 
 namespace gsmpl {
-void VisualToolImpl::visualizeAxis(const State& q, const std::string& poseDesc)
-{
+void VisualToolImpl::visualizeAxis(const State& q,
+                                   const std::string& poseDesc) {
     if (q.size() > 0) {
         visualTool_.publishAxisLabeled(fk_->tcpPose(q), poseDesc);
         visualTool_.trigger();
@@ -11,20 +11,18 @@ void VisualToolImpl::visualizeAxis(const State& q, const std::string& poseDesc)
 }
 
 void VisualToolImpl::visualizeAxis(const geometry_msgs::msg::Pose& pose,
-                                   const std::string& poseDesc)
-{
+                                   const std::string& poseDesc) {
     visualTool_.publishAxisLabeled(pose, poseDesc);
     visualTool_.trigger();
 }
 
-void VisualToolImpl::visualizeAxis(const Eigen::Isometry3d& pose, const std::string& poseDesc)
-{
+void VisualToolImpl::visualizeAxis(const Eigen::Isometry3d& pose,
+                                   const std::string& poseDesc) {
     visualTool_.publishAxisLabeled(pose, poseDesc);
     visualTool_.trigger();
 }
 void VisualToolImpl::visualizePoint(const Eigen::Vector3d& p, const RGBA& color,
-                                    const std::string& name)
-{
+                                    const std::string& name) {
     double scale = 0.02;
     geometry_msgs::msg::Point point;
     point.x = p(0);
@@ -49,14 +47,14 @@ void VisualToolImpl::visualizePoint(const Eigen::Vector3d& p, const RGBA& color,
     visualTool_.publishMarker(sphere);
     visualTool_.trigger();
 }
-void VisualToolImpl::visualizePoint(const State& q, const RGBA& color, const std::string& name)
-{
+void VisualToolImpl::visualizePoint(const State& q, const RGBA& color,
+                                    const std::string& name) {
     auto s = fk_->tcpPose(q).translation();
     Eigen::Vector3d sv(s.x(), s.y(), s.z());
     visualizePoint(sv, color, name);
 }
-void VisualToolImpl::visualizePoses(const std::vector<State>& qVector, const RGBA& color)
-{
+void VisualToolImpl::visualizePoses(const std::vector<State>& qVector,
+                                    const RGBA& color) {
     std::cout << "visualizePoses path size: " << qVector.size() << std::endl;
     double scale = 0.02;
     visualization_msgs::msg::Marker sphere;
@@ -79,16 +77,15 @@ void VisualToolImpl::visualizePoses(const std::vector<State>& qVector, const RGB
     visualTool_.trigger();
 }
 
-void VisualToolImpl::visualizeAxises(const std::vector<State>& qVector)
-{
+void VisualToolImpl::visualizeAxises(const std::vector<State>& qVector) {
     for (const auto& q : qVector) {
         visualizeAxis(q, "");
     }
     visualTool_.trigger();
 }
 
-void VisualToolImpl::visualizeTree(const Tree& tree, const RGBA& color, const std::string& name)
-{
+void VisualToolImpl::visualizeTree(const Tree& tree, const RGBA& color,
+                                   const std::string& name) {
     TreeVisualizeRecord record = tree2Record(tree.root());
     std::cout << "tree vertex size: " << record.vertexes.size() << std::endl;
     double scale = 0.001;
@@ -131,8 +128,7 @@ void VisualToolImpl::visualizeTree(const Tree& tree, const RGBA& color, const st
     visualTool_.trigger();
 }
 
-geometry_msgs::msg::Point VisualToolImpl::state2Point(const State& q)
-{
+geometry_msgs::msg::Point VisualToolImpl::state2Point(const State& q) {
     geometry_msgs::msg::Point point;
     Eigen::Isometry3d tf = fk_->tcpPose(q);
     point.x = tf.translation().x();
@@ -140,14 +136,13 @@ geometry_msgs::msg::Point VisualToolImpl::state2Point(const State& q)
     point.z = tf.translation().z();
     return point;
 }
-TreeVisualizeRecord VisualToolImpl::tree2Record(const VertexPtr root) const
-{
+TreeVisualizeRecord VisualToolImpl::tree2Record(const VertexPtr root) const {
     TreeVisualizeRecord record;
     updateRecord(root.get(), record);
     return record;
 }
-void VisualToolImpl::updateRecord(const Vertex* v, TreeVisualizeRecord& record) const
-{
+void VisualToolImpl::updateRecord(const Vertex* v,
+                                  TreeVisualizeRecord& record) const {
     if (!v)
         return;
     record.vertexes.push_back(v);
@@ -158,8 +153,7 @@ void VisualToolImpl::updateRecord(const Vertex* v, TreeVisualizeRecord& record) 
     }
 }
 
-void VisualTool::visualizePlannerRecord(const PlannerRecord& data)
-{
+void VisualTool::visualizePlannerRecord(const PlannerRecord& data) {
     deleteAllMarkers();
     VisualToolImpl::visualizePoint(data.start, Orange, "start");
     visualizeAxis(data.goal, "goal");

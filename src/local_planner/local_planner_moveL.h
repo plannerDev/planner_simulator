@@ -9,29 +9,30 @@
 #include "../robot_algo/fk_panda.h"
 
 namespace gsmpl {
-class MoveL : public LocalPlannerBase
-{
+class MoveL : public LocalPlannerBase {
 public:
-    MoveL(const FKPandaPtr& fk, const IKPandaPtr& ik, const AllStateValidityCheckerPtr& checker,
-          std::size_t dimension)
-        : LocalPlannerBase(nullptr, checker), fk_(fk), ik_(ik), dimension_(dimension)
-    {
-    }
+    MoveL(const FKPandaPtr& fk, const IKPandaPtr& ik,
+          const AllStateValidityCheckerPtr& checker, std::size_t dimension)
+        : LocalPlannerBase(nullptr, checker),
+          fk_(fk),
+          ik_(ik),
+          dimension_(dimension) {}
 
     // from: Jps to: se3 return: Jps
-    std::optional<State> interpolateState(const State& startJps, const State& targetSe3,
-                                          double time) const override
-    {
+    std::optional<State> interpolateState(const State& startJps,
+                                          const State& targetSe3,
+                                          double time) const override {
         assert(startJps.size() == dimension_);
         assert(targetSe3.size() == 7);
         Eigen::Isometry3d startSe3 = fk_->tcpPose(startJps);
-        Eigen::Isometry3d pose = se3_.interpolateSe3(startSe3, se3_.state2Se3(targetSe3), time);
+        Eigen::Isometry3d pose =
+            se3_.interpolateSe3(startSe3, se3_.state2Se3(targetSe3), time);
         return ik_->ik(startJps, pose);
     }
     // from: Jps to: se3 return: Jps
-    std::optional<State> validInterpolateState(const State& startJps, const State& targetSe3,
-                                               double time) const override
-    {
+    std::optional<State> validInterpolateState(const State& startJps,
+                                               const State& targetSe3,
+                                               double time) const override {
         assert(startJps.size() == dimension_);
         assert(targetSe3.size() == 7);
 
@@ -42,15 +43,16 @@ public:
         return {};
     }
     // time[0.0, 1.0], return true, if interpolated path is valid
-    std::optional<Path> validInterpolatePath(const State& startJps, const State& targetSe3,
-                                             double stepSize) const override
-    {
+    std::optional<Path> validInterpolatePath(const State& startJps,
+                                             const State& targetSe3,
+                                             double stepSize) const override {
         assert(startJps.size() == dimension_);
         assert(targetSe3.size() == 7);
 
         Path path;
         Eigen::Isometry3d startSe3 = fk_->tcpPose(startJps);
-        double distance = se3_.distanceTrans(startSe3, se3_.state2Se3(targetSe3));
+        double distance =
+            se3_.distanceTrans(startSe3, se3_.state2Se3(targetSe3));
         unsigned int steps = floor(distance / stepSize);
         double deltaTime = 1.0 / (double)steps;
         path.push_back(startJps);

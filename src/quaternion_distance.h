@@ -108,7 +108,8 @@ namespace planner {
 //         Se3Position p1 = p1.State2Position(s1);
 //         Se3Position p2 = p2.State2Position(s2);
 
-//         return quat_.isEquivalent(p1.quat, p2.quat) && pose_,isEquivalent(p1.pose, p2.pose);
+//         return quat_.isEquivalent(p1.quat, p2.quat) &&
+//         pose_,isEquivalent(p1.pose, p2.pose);
 //     }
 
 // private:

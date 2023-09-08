@@ -10,16 +10,20 @@
 namespace gsmpl {
 GSMPL_CLASS_FORWARD(FKPanda)
 
-class EXPORT FKPanda : public FKBase
-{
+class EXPORT FKPanda : public FKBase {
 public:
-    FKPanda(moveit::core::RobotModelConstPtr robotModel, const std::string group);
+    FKPanda(moveit::core::RobotModelConstPtr robotModel,
+            const std::string group);
 
     // void init();
     void update(const State& q);
-    const std::map<std::string, Eigen::Isometry3d>& getLinkTf() const { return linksTf_; }
+    const std::map<std::string, Eigen::Isometry3d>& getLinkTf() const {
+        return linksTf_;
+    }
     const std::vector<std::string>& getLinkNames() const { return linkNames_; }
-    const std::vector<std::string>& getActiveLinkNames() const { return activeLinkNames_; }
+    const std::vector<std::string>& getActiveLinkNames() const {
+        return activeLinkNames_;
+    }
     Eigen::Isometry3d tcpPose(const State& q) override;
     void Test_Jacobian(const State& q);
 
@@ -28,7 +32,8 @@ public:
     Eigen::MatrixXd jacobianEstimate(const State& q);
 
 private:
-    void lookupLinktf(const State& q, const Eigen::Isometry3d& tfPre, std::size_t index);
+    void lookupLinktf(const State& q, const Eigen::Isometry3d& tfPre,
+                      std::size_t index);
 
     moveit::core::RobotModelConstPtr robotModel_;
     std::string group_;
