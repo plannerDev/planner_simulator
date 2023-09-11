@@ -6,9 +6,11 @@
 #include <geometric_shapes/shapes.h>
 #include <fcl/collision.h>
 #include <Eigen/Geometry>
-#include <utility/class_forward.h>
-#include <tools/checker/state_checker_base.h>
-#include <utility/export.h>
+
+#include <gsmpl/utility/class_forward.h>
+#include <gsmpl/tools/checker/state_checker_base.h>
+#include <gsmpl/utility/export.h>
+
 #include "../robot_algo/fk_panda.h"
 #include "../visualizer/visual_tool.h"
 

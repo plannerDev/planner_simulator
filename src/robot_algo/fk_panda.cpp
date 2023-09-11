@@ -3,8 +3,10 @@
 #include <Eigen/Dense>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/link_model.h>
-#include <utility/log_utility.h>
-#include <base/math_utility.h>
+
+#include <gsmpl/utility/log_utility.h>
+#include <gsmpl/base/math_utility.h>
+
 #include "fk_panda.h"
 
 namespace gsmpl {

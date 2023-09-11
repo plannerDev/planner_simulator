@@ -2,14 +2,14 @@
 #include <assert.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
-#include <planner_interface.h>
-#include <planner/bi_rrt/bi_rrt_param.h>
-#include <planner/rrt/rrt_param.h>
-#include <planner/rrt_star/rrt_star_param.h>
-#include <planner/informed_rrt_star/informed_rrt_star_param.h>
-#include <planner_data/planner_param.h>
-#include <tools/checker/state_checker_group.h>
-#include <tools/checker/cone_region_checker.h>
+#include <gsmpl/planner_interface.h>
+#include <gsmpl/planner/bi_rrt/bi_rrt_param.h>
+#include <gsmpl/planner/rrt/rrt_param.h>
+#include <gsmpl/planner/rrt_star/rrt_star_param.h>
+#include <gsmpl/planner/informed_rrt_star/informed_rrt_star_param.h>
+#include <gsmpl/planner_data/planner_param.h>
+#include <gsmpl/tools/checker/state_checker_group.h>
+#include <gsmpl/tools/checker/cone_region_checker.h>
 
 #include "collision_checker/collision_checker.h"
 #include "rrt_planning_context.h"

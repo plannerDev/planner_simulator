@@ -36,6 +36,7 @@ find_package(rclcpp_action REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(gsmpl REQUIRED)
 
 set(PACKAGE_INCLUDE_DEPENDENCIES
   ament_cmake
@@ -56,6 +57,7 @@ set(PACKAGE_INCLUDE_DEPENDENCIES
   Boost
   control_msgs
   moveit_servo
+  gsmpl
 )
 
 add_subdirectory(src)

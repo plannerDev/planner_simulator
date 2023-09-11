@@ -6,7 +6,9 @@
 #include <fcl/octree.h>
 #include <fcl/BVH/BVH_model.h>
 #include <fcl/shape/geometric_shapes.h>
-#include <utility/log_utility.h>
+
+#include <gsmpl/utility/log_utility.h>
+
 #include "collision_checker.h"
 
 namespace gsmpl {

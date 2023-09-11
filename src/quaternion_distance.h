@@ -2,7 +2,7 @@
 
 #include <Eigen/Geometry>
 #include <cmath>
-#include <tools/distance/distance.h>
+#include <gsmpl/tools/distance/distance.h>
 
 namespace planner {
 // PLANNER_CLASS_FORWARD(QuaternionDistance)

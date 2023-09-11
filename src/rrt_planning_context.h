@@ -3,8 +3,8 @@
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
-#include <planner_data/planner_solution.h>
-#include <planner_data/planner_context.h>
+#include <gsmpl/planner_data/planner_solution.h>
+#include <gsmpl/planner_data/planner_context.h>
 #include "visualizer/visual_tool.h"
 #include "robot_algo/fk_panda.h"
 

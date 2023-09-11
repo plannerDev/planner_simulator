@@ -6,10 +6,10 @@
 #include <visualization_msgs/msg/marker.h>
 #include <Eigen/Core>
 #include <rclcpp/rclcpp.hpp>
-#include <utility/log_utility.h>
-#include <base/math_utility.h>
-#include <planner_data/planner_record.h>
-#include <base/tree.h>
+#include <gsmpl/utility/log_utility.h>
+#include <gsmpl/base/math_utility.h>
+#include <gsmpl/planner_data/planner_record.h>
+#include <gsmpl/base/tree.h>
 #include "../robot_algo/fk_panda.h"
 
 namespace gsmpl {

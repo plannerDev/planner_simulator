@@ -1,10 +1,10 @@
 #pragma once
 
 #include <optional>
-#include <tools/checker/all_state_validity_checker.h>
-#include <base/bounds.h>
-#include <base/se3_space.h>
-#include <tools/local_planner/localPlanner.h>
+#include <gsmpl/tools/checker/all_state_validity_checker.h>
+#include <gsmpl/base/bounds.h>
+#include <gsmpl/base/se3_space.h>
+#include <gsmpl/tools/local_planner/localPlanner.h>
 #include "../robot_algo/ik_panda.h"
 #include "../robot_algo/fk_panda.h"
 

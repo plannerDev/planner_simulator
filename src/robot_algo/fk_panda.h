@@ -2,9 +2,9 @@
 
 #include <moveit/robot_model/robot_model.h>
 #include <Eigen/Geometry>
-#include <utility/export.h>
-#include <utility/class_forward.h>
-#include <base/state.h>
+#include <gsmpl/utility/export.h>
+#include <gsmpl/utility/class_forward.h>
+#include <gsmpl/base/state.h>
 #include <robot_algo/fk.h>
 
 namespace gsmpl {

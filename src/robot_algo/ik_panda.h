@@ -2,9 +2,9 @@
 
 #include <optional>
 #include <Eigen/Geometry>
-#include <base/state.h>
-#include <base/bounds.h>
-#include <utility/class_forward.h>
+#include <gsmpl/base/state.h>
+#include <gsmpl/base/bounds.h>
+#include <gsmpl/utility/class_forward.h>
 
 namespace gsmpl {
 GSMPL_CLASS_FORWARD(IKPanda)
