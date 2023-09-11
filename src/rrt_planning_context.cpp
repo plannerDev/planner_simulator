@@ -274,7 +274,7 @@ bool RRTPlanningContext::solve(
     res.trajectory_.clear();
     bool solved = false;
     gsmpl::DistanceBasePtr distance =
-        std::make_shared<gsmpl::DistanceL2>(context.generalParam.bounds);
+        std::make_shared<gsmpl::DistanceL2>(context.general_param.bounds);
 
     for (const auto& goalConstraint : request_.goal_constraints) {
         // start
@@ -292,12 +292,12 @@ bool RRTPlanningContext::solve(
         // RRT goal
         gsmpl::GoalWithJointTolerancePtr goalPtr =
             std::make_shared<gsmpl::GoalWithJointTolerance>(
-                context.generalParam.bounds, rrt_star::GOAL_THRESHOLD, goal,
+                context.general_param.bounds, rrt_star::GOAL_THRESHOLD, goal,
                 distance);
         // optiObjective
         gsmpl::OptiPathLengthPtr optiObjective =
             std::make_shared<gsmpl::OptiPathLength>(
-                bi_rrt::COST_THRESHOLD, context.generalParam.bounds, distance);
+                bi_rrt::COST_THRESHOLD, context.general_param.bounds, distance);
         // ProblemDefinition
         gsmpl::ProblemDefinition pd{start, goalPtr, optiObjective};
 
