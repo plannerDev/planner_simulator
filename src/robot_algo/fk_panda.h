@@ -5,7 +5,7 @@
 #include <gsmpl/utility/export.h>
 #include <gsmpl/utility/class_forward.h>
 #include <gsmpl/base/state.h>
-#include <robot_algo/fk.h>
+#include <gsmpl/robot_algo/fk.h>
 
 namespace gsmpl {
 GSMPL_CLASS_FORWARD(FKPanda)
