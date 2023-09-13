@@ -189,7 +189,7 @@ Eigen::MatrixXd FKPanda::jacobianEstimate(const State& q) {
 
     for (int i = 0; i < columns; i++) {
         State qn = q;
-        qn.values[i] += dq;
+        qn.position[i] += dq;
         update(qn);
         Eigen::Isometry3d tfn = linksTf_["panda_hand"];
         Eigen::VectorXd yn = se3ToVector(tfn);

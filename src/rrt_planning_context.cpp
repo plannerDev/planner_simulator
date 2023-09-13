@@ -22,7 +22,7 @@ gsmpl::State moveit2Planner(const moveit::core::RobotState& robotState,
     for (const auto& jointModel : jmg->getActiveJointModels()) {
         const double* valuePtr = robotState.getJointPositions(jointModel);
         double value = valuePtr[0];
-        state.push_back(value);
+        state.position.push_back(value);
     }
     return state;
 }
@@ -54,7 +54,9 @@ robot_trajectory::RobotTrajectory RRTPlanningContext::path2Trajectry(
     double dt = 0.01;
     for (const auto& point : path) {
         moveit::core::RobotState state(robotModel_);
-        state.setJointGroupPositions(group_, point.values);
+        state.setJointGroupPositions(group_, point.position);
+        // state.setVariableVelocities(point.velocity);
+        // state.setVariableAccelerations(point.acceleration);
         trajectory.addSuffixWayPoint(state, dt);
     }
     std::cout << "rrt trajectory size: " << trajectory.getWayPointCount()
@@ -99,8 +101,12 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextBiRRT() {
         bi_rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         bi_rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         bi_rrt::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
+    gsmpl::TrajectoryProcessingParamters trajProcessingParam{
+        bi_rrt::LOCAL_PLANNER_SETP_SIZE_JPS,
+        bi_rrt::LOCAL_PLANNER_SETP_SIZE_TCP, bi_rrt::DT};
     gsmpl::PlannerGeneralParamters generalParam{
-        bounds.size(), pathSimplifierParam, bounds, bi_rrt::CONE_THRESHOLD};
+        bounds.size(), pathSimplifierParam, trajProcessingParam, bounds,
+        bi_rrt::CONE_THRESHOLD};
     // context
     return gsmpl::PlannerContext(
         gsmpl::PlannerType::BiRRT,
@@ -148,8 +154,12 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRT() {
         rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         rrt::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         rrt::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
+    gsmpl::TrajectoryProcessingParamters trajProcessingParam{
+        rrt::LOCAL_PLANNER_SETP_SIZE_JPS, rrt::LOCAL_PLANNER_SETP_SIZE_TCP,
+        rrt::DT};
     gsmpl::PlannerGeneralParamters generalParam{
-        bounds.size(), pathSimplifierParam, bounds, rrt::CONE_THRESHOLD};
+        bounds.size(), pathSimplifierParam, trajProcessingParam, bounds,
+        rrt::CONE_THRESHOLD};
     // context
     return gsmpl::PlannerContext(gsmpl::PlannerType::RRT,
                                  std::make_shared<gsmpl::SampleWithBiasParam>(
@@ -196,8 +206,12 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextRRTStar() {
         rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         rrt_star::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
+    gsmpl::TrajectoryProcessingParamters trajProcessingParam{
+        rrt_star::LOCAL_PLANNER_SETP_SIZE_JPS,
+        rrt_star::LOCAL_PLANNER_SETP_SIZE_TCP, rrt_star::DT};
     gsmpl::PlannerGeneralParamters generalParam{
-        bounds.size(), pathSimplifierParam, bounds, rrt_star::CONE_THRESHOLD};
+        bounds.size(), pathSimplifierParam, trajProcessingParam, bounds,
+        rrt_star::CONE_THRESHOLD};
     // context
     return gsmpl::PlannerContext(
         gsmpl::PlannerType::RRTStar,
@@ -251,8 +265,11 @@ gsmpl::PlannerContext RRTPlanningContext::creatPlannerContextInformedRRTStar() {
         informed_rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MAX_STEPS,
         informed_rrt_star::PATH_SIMPLIFIER_SMOOTH_BSPLINE_MIN_CHANGE,
         informed_rrt_star::PATH_SIMPLIFIER_COLLAPSE_CLOSE_VERTICES_MAX_STEPS};
+    gsmpl::TrajectoryProcessingParamters trajProcessingParam{
+        informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_JPS,
+        informed_rrt_star::LOCAL_PLANNER_SETP_SIZE_TCP, informed_rrt_star::DT};
     gsmpl::PlannerGeneralParamters generalParam{
-        bounds.size(), pathSimplifierParam, bounds,
+        bounds.size(), pathSimplifierParam, trajProcessingParam, bounds,
         informed_rrt_star::CONE_THRESHOLD};
     // context
     return gsmpl::PlannerContext(
@@ -268,8 +285,8 @@ bool RRTPlanningContext::solve(
     auto startTime = std::chrono::steady_clock::now();
     // gsmpl::PlannerContext context = creatPlannerContextBiRRT();
     // gsmpl::PlannerContext context = creatPlannerContextRRT();
-    gsmpl::PlannerContext context = creatPlannerContextRRTStar();
-    // gsmpl::PlannerContext context = creatPlannerContextInformedRRTStar();
+    // gsmpl::PlannerContext context = creatPlannerContextRRTStar();
+    gsmpl::PlannerContext context = creatPlannerContextInformedRRTStar();
 
     res.trajectory_.clear();
     bool solved = false;
@@ -286,14 +303,14 @@ bool RRTPlanningContext::solve(
         gsmpl::State goal = reqGoal2Values(goalConstraint);
 
         // BiRRT goal
-        // gsmpl::GoalSingleStatePtr goalPtr =
-        //     std::make_shared<gsmpl::GoalSingleState>(context.generalParam.bounds,
-        //     goal, distance);
+        gsmpl::GoalSingleStatePtr goalPtr =
+            std::make_shared<gsmpl::GoalSingleState>(
+                context.general_param.bounds, goal, distance);
         // RRT goal
-        gsmpl::GoalWithJointTolerancePtr goalPtr =
-            std::make_shared<gsmpl::GoalWithJointTolerance>(
-                context.general_param.bounds, rrt_star::GOAL_THRESHOLD, goal,
-                distance);
+        // gsmpl::GoalWithJointTolerancePtr goalPtr =
+        //     std::make_shared<gsmpl::GoalWithJointTolerance>(
+        //         context.general_param.bounds, rrt_star::GOAL_THRESHOLD, goal,
+        //         distance);
         // optiObjective
         gsmpl::OptiPathLengthPtr optiObjective =
             std::make_shared<gsmpl::OptiPathLength>(
@@ -312,7 +329,7 @@ bool RRTPlanningContext::solve(
         solved = pi.plan(solution_);
         pi.visualize();
 
-        gsmpl::Path path = solution_.path;
+        gsmpl::Path path = solution_.trajectory.dense_waypoints;
 
         robot_trajectory::RobotTrajectory trajectory = path2Trajectry(path);
         res.trajectory_.push_back(
@@ -342,7 +359,7 @@ gsmpl::State RRTPlanningContext::reqGoal2Values(
     const moveit_msgs::msg::Constraints& constraint) {
     gsmpl::State state;
     for (const auto& jointConstraint : constraint.joint_constraints) {
-        state.push_back(jointConstraint.position);
+        state.position.push_back(jointConstraint.position);
     }
     return state;
 }
