@@ -181,13 +181,13 @@ int main(int argc, char** argv) {
 
     /* Re-construct the planning context */
     context =
-        rrtPlanner->getPlanningContext(planningScene, req, res.error_code_);
+        rrtPlanner->getPlanningContext(planningScene, req, res.error_code);
     RCLCPP_INFO(LOGGER, "Call the Planner");
     /* Call the Planner */
     context->solve(res);
 
     /* Check that the planning was successful */
-    if (res.error_code_.val != res.error_code_.SUCCESS) {
+    if (res.error_code.val != res.error_code.SUCCESS) {
         RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
         //   return 0;
     }

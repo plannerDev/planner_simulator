@@ -4,7 +4,7 @@
 #include <moveit/collision_detection/collision_matrix.h>
 #include <moveit/collision_detection/world.h>
 #include <geometric_shapes/shapes.h>
-#include <fcl/collision.h>
+#include <fcl/narrowphase/collision.h>
 #include <Eigen/Geometry>
 
 #include <gsmpl/utility/class_forward.h>
@@ -35,9 +35,9 @@ public:
     bool isValid(const State& q) override;
 
 private:
-    std::shared_ptr<fcl::CollisionGeometry> constructFCLGeometry(
+    std::shared_ptr<fcl::CollisionGeometryd> constructFCLGeometry(
         const shapes::ShapeConstPtr& shape);
-    std::vector<std::shared_ptr<fcl::CollisionGeometry>>
+    std::vector<std::shared_ptr<fcl::CollisionGeometryd>>
     constructFCLGeometryRobotLink(const std::string& name);
     void constructFCLGeometryRobot();
     void constructFCLObjectRobotLink(const std::string name,
@@ -47,9 +47,9 @@ private:
         const collision_detection::WorldConstPtr& world);
     bool checkShapeGroupCollision(
         const std::pair<std::string,
-                        std::vector<std::shared_ptr<fcl::CollisionObject>>>& g1,
+                        std::vector<std::shared_ptr<fcl::CollisionObjectd>>>& g1,
         const std::pair<std::string,
-                        std::vector<std::shared_ptr<fcl::CollisionObject>>>&
+                        std::vector<std::shared_ptr<fcl::CollisionObjectd>>>&
             g2);
     bool robotSelfCollisionCheck();
     bool robotWorldCollisionCheck();
@@ -62,12 +62,12 @@ private:
     std::vector<std::string> linkNames_;
     std::map<std::string, Eigen::Isometry3d> linksTf_;
     collision_detection::AllowedCollisionMatrix acm_;
-    std::map<std::string, std::vector<std::shared_ptr<fcl::CollisionGeometry>>>
+    std::map<std::string, std::vector<std::shared_ptr<fcl::CollisionGeometryd>>>
         fclGeometriesRobot_;
-    std::vector<std::shared_ptr<fcl::CollisionGeometry>> fclGeometriesWorld_;
-    std::map<std::string, std::vector<std::shared_ptr<fcl::CollisionObject>>>
+    std::vector<std::shared_ptr<fcl::CollisionGeometryd>> fclGeometriesWorld_;
+    std::map<std::string, std::vector<std::shared_ptr<fcl::CollisionObjectd>>>
         fclObjsRobotMap_;
-    std::map<std::string, std::vector<std::shared_ptr<fcl::CollisionObject>>>
+    std::map<std::string, std::vector<std::shared_ptr<fcl::CollisionObjectd>>>
         fclObjsWorldMap_;
     double time_{0};
     int times_{0};

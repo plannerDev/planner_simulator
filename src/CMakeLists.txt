@@ -22,6 +22,15 @@ set(INSTALL_DIR ~/ws_moveit2/install/rrt_plugin)
 
 install(TARGETS rrt_plugin EXPORT export_${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_DIR}/lib)
 
+install(TARGETS rrt_plugin 
+  EXPORT moveit_planners_rrt_pluginTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+ament_export_targets(moveit_planners_rrt_pluginTargets HAS_LIBRARY_TARGET)
+
 foreach(dir ${INCLUDE_DIRS})
     file(GLOB_RECURSE headers "${dir}/*.h")
     install(FILES ${headers} DESTINATION ${INSTALL_DIR}/incldue/${dir})
@@ -41,3 +50,6 @@ target_link_libraries(rrt_demo ${PLANNER_LIB})
 ament_target_dependencies(rrt_demo ${PACKAGE_INCLUDE_DEPENDENCIES})
 
 install(TARGETS rrt_demo DESTINATION ${INSTALL_DIR}/lib/${PROJECT_NAME})
+install(TARGETS rrt_demo
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
