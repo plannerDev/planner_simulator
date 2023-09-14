@@ -58,7 +58,7 @@ void CollisionChecker::FKUnitTest(const State& q) {
     moveit::core::RobotState robot_state(robotModel_);
     const moveit::core::JointModelGroup* jmg =
         robotModel_->getJointModelGroup("panda_arm");
-    robot_state.setJointGroupPositions(jmg, q.values);
+    robot_state.setJointGroupPositions(jmg, q.position);
 
     for (const auto& name : linkNames_) {
         Eigen::Isometry3d pose = robot_state.getGlobalLinkTransform(name);
