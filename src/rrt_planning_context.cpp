@@ -30,16 +30,16 @@ gsmpl::State moveit2Planner(const moveit::core::RobotState& robotState,
 bool RRTPlanningContext::solve(planning_interface::MotionPlanResponse& res) {
     planning_interface::MotionPlanDetailedResponse detailRes;
     if (solve(detailRes)) {
-        std::cout << "detail_res.trajectory_ size "
-                  << detailRes.trajectory_.size() << std::endl;
-        res.trajectory_ =
+        std::cout << "detail_res.trajectory size "
+                  << detailRes.trajectory.size() << std::endl;
+        res.trajectory =
             detailRes
-                .trajectory_[0]; // TODO: generate multi-segment trajectories
+                .trajectory[0]; // TODO: generate multi-segment trajectories
         std::cout << "res.trajectory size: "
-                  << res.trajectory_->getWayPointCount() << std::endl;
+                  << res.trajectory->getWayPointCount() << std::endl;
     }
-    res.planning_time_ = detailRes.processing_time_[0];
-    res.error_code_ = detailRes.error_code_;
+    res.planning_time = detailRes.processing_time[0];
+    res.error_code = detailRes.error_code;
     return true;
 }
 
@@ -289,7 +289,7 @@ bool RRTPlanningContext::solve(
     // gsmpl::PlannerContext context = creatPlannerContextRRTStar();
     gsmpl::PlannerContext context = creatPlannerContextInformedRRTStar();
 
-    res.trajectory_.clear();
+    res.trajectory.clear();
     bool solved = false;
     gsmpl::DistanceBasePtr distance =
         std::make_shared<gsmpl::DistanceL2>(context.general_param.bounds);
@@ -333,24 +333,24 @@ bool RRTPlanningContext::solve(
         gsmpl::Path path = solution_.trajectory.dense_waypoints;
 
         robot_trajectory::RobotTrajectory trajectory = path2Trajectry(path);
-        res.trajectory_.push_back(
+        res.trajectory.push_back(
             std::make_shared<robot_trajectory::RobotTrajectory>(trajectory));
 
         if (!solved)
             break;
     }
     if (solved) {
-        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         std::cout << "rrt SUCCESS!" << std::endl;
     } else {
-        res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
         std::cout << "rrt FAILURE!" << std::endl;
     }
-    res.description_.push_back("rrt_planner");
+    res.description.push_back("rrt_planner");
     auto endTime = std::chrono::steady_clock::now();
-    res.processing_time_.push_back(
+    res.processing_time.push_back(
         std::chrono::duration<double>((endTime - startTime)).count()); // s
-    // std::cout << "processing_time: " << res.processing_time_[0] << " " <<
+    // std::cout << "processing_time: " << res.processing_time[0] << " " <<
     // (endTime - startTime).count() << std::endl;
 
     return solved;
