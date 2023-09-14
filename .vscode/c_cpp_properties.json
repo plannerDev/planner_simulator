@@ -1,39 +1,40 @@
 {
-  "configurations": [
-    {
-      "browse": {
-        "databaseFilename": "${default}",
-        "limitSymbolsToIncludedHeaders": false
-      },
-      "includePath": [
-        "/home/dsh/ws_moveit2/install/moveit_visual_tools/include/**",
-        "/home/dsh/ws_moveit2/install/rviz_visual_tools/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_simple_controller_manager/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_servo/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_visualization/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_planning_interface/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_benchmarks/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_warehouse/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_robot_interaction/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_perception/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_move_group/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_planners_ompl/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_planning/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_ros_occupancy_map_monitor/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_kinematics/include/**",
-        "/home/dsh/ws_moveit2/install/chomp_motion_planner/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_core/include/**",
-        "/home/dsh/ws_moveit2/install/moveit_msgs/include/**",
-        "/home/dsh/ws_moveit2/install/geometric_shapes/include/**",
-        "/opt/ros/foxy/include/**",
-        "/usr/include/**"
-      ],
-      "name": "ROS",
-      "intelliSenseMode": "gcc-x64",
-      "compilerPath": "/usr/bin/gcc",
-      "cStandard": "gnu11",
-      "cppStandard": "c++14"
-    }
-  ],
-  "version": 4
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/home/dsh/ws_moveit2/install/moveit_visual_tools/include/**",
+                "/home/dsh/ws_moveit2/install/rviz_visual_tools/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_simple_controller_manager/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_servo/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_visualization/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_planning_interface/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_benchmarks/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_warehouse/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_robot_interaction/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_perception/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_move_group/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_planners_ompl/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_planning/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_ros_occupancy_map_monitor/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_kinematics/include/**",
+                "/home/dsh/ws_moveit2/install/chomp_motion_planner/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_core/include/**",
+                "/home/dsh/ws_moveit2/install/moveit_msgs/include/**",
+                "/home/dsh/ws_moveit2/install/geometric_shapes/include/**",
+                "/home/dsh/ws_moveit2/install/gsmpl/include/**",
+                "/opt/ros/foxy/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
 }

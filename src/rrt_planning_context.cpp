@@ -52,11 +52,12 @@ robot_trajectory::RobotTrajectory RRTPlanningContext::path2Trajectry(
     auto trajectory =
         robot_trajectory::RobotTrajectory(robotModel_, getGroupName());
     double dt = 0.01;
+
     for (const auto& point : path) {
         moveit::core::RobotState state(robotModel_);
-        state.setJointGroupPositions(group_, point.position);
-        // state.setVariableVelocities(point.velocity);
-        // state.setVariableAccelerations(point.acceleration);
+        state.setJointGroupActivePositions(group_, point.position);
+        state.setJointGroupVelocities(group_, point.velocity);
+        state.setJointGroupAccelerations(group_, point.acceleration);
         trajectory.addSuffixWayPoint(state, dt);
     }
     std::cout << "rrt trajectory size: " << trajectory.getWayPointCount()
